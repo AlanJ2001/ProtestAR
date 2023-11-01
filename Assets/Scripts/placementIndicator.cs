@@ -14,6 +14,10 @@ public class placementIndicator : MonoBehaviour
     private Pose hitPose;
     public GameObject image;
 
+    public ARAnchorManager anchorManager;
+
+    ARPlane plane;
+
 
 
     // Start is called before the first frame update
@@ -37,6 +41,9 @@ public class placementIndicator : MonoBehaviour
     {
         image = Instantiate(image, hitPose.position, hitPose.rotation);
         image.transform.Rotate(90, 0, 0);
+        image.AddComponent<ARAnchor>();
+        ARAnchor _anchor = anchorManager.AttachAnchor(plane, hitPose);
+        image.transform.SetParent(_anchor.transform);
     }
 
     private void UpdatePlacementIndicator() 
@@ -62,6 +69,7 @@ public class placementIndicator : MonoBehaviour
         placementPoseIsValid = raycastHits.Count > 0;
         if (placementPoseIsValid)
         {
+            plane = planeManager.GetPlane(raycastHits[0].trackableId);
             hitPose = raycastHits[0].pose;
         }
     }
