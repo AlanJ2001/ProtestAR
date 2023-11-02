@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
+using Google.XR.ARCoreExtensions;
 
 public class placementIndicator : MonoBehaviour
 {
@@ -44,6 +45,7 @@ public class placementIndicator : MonoBehaviour
         image.AddComponent<ARAnchor>();
         ARAnchor _anchor = anchorManager.AttachAnchor(plane, hitPose);
         image.transform.SetParent(_anchor.transform);
+        CreatePromise(_anchor);
     }
 
     private void UpdatePlacementIndicator() 
@@ -72,5 +74,18 @@ public class placementIndicator : MonoBehaviour
             plane = planeManager.GetPlane(raycastHits[0].trackableId);
             hitPose = raycastHits[0].pose;
         }
+    }
+
+    public void CreatePromise(ARAnchor _anchor)
+    {
+        HostCloudAnchorPromise cloudAnchorPromise = anchorManager.HostCloudAnchorAsync(_anchor, 1);
+        StartCoroutine(CheckCloudAnchorPromise(cloudAnchorPromise));
+    }
+    private IEnumerator CheckCloudAnchorPromise(HostCloudAnchorPromise promise)
+    {
+        yield return promise;
+        if (promise.State == PromiseState.Cancelled) yield break;
+        var result = promise.Result;
+        /// Use the result of your promise here.
     }
 }
