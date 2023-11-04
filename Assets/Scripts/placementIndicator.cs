@@ -40,11 +40,11 @@ public class placementIndicator : MonoBehaviour
 
     private void PlaceObject()
     {
-        image = Instantiate(image, hitPose.position, hitPose.rotation);
-        image.transform.Rotate(90, 0, 0);
-        image.AddComponent<ARAnchor>();
+        GameObject instantiatedImage = Instantiate(image, hitPose.position, hitPose.rotation);
+        instantiatedImage.transform.Rotate(90, 0, 0);
+        instantiatedImage.AddComponent<ARAnchor>();
         ARAnchor _anchor = anchorManager.AttachAnchor(plane, hitPose);
-        image.transform.SetParent(_anchor.transform);
+        instantiatedImage.transform.SetParent(_anchor.transform);
         CreatePromise(_anchor);
     }
 
