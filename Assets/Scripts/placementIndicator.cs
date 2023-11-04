@@ -19,12 +19,13 @@ public class placementIndicator : MonoBehaviour
 
     ARPlane plane;
 
-
+    DebugManager db;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        db = FindObjectOfType<DebugManager>();
+        db.AppendLogMessage("testing");
     }
 
     // Update is called once per frame
@@ -45,6 +46,7 @@ public class placementIndicator : MonoBehaviour
         instantiatedImage.AddComponent<ARAnchor>();
         ARAnchor _anchor = anchorManager.AttachAnchor(plane, hitPose);
         instantiatedImage.transform.SetParent(_anchor.transform);
+        db.AppendLogMessage("anchor created");
         CreatePromise(_anchor);
     }
 
