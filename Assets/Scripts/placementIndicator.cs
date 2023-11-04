@@ -25,7 +25,7 @@ public class placementIndicator : MonoBehaviour
     void Start()
     {
         db = FindObjectOfType<DebugManager>();
-        db.AppendLogMessage("testing");
+        db.AppendLogMessage("start debugging");
     }
 
     // Update is called once per frame
@@ -88,6 +88,7 @@ public class placementIndicator : MonoBehaviour
         yield return promise;
         if (promise.State == PromiseState.Cancelled) yield break;
         var result = promise.Result;
-        /// Use the result of your promise here.
+        db.AppendLogMessage(result.CloudAnchorState.ToString());
+        db.AppendLogMessage(result.CloudAnchorId);
     }
 }
