@@ -35,7 +35,11 @@ public class placementIndicator : MonoBehaviour
         UpdatePlacementIndicator();
         if (placementPoseIsValid && Input.touchCount>0 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
-            PlaceObject();
+            Touch touch = Input.GetTouch(0);
+            float y = touch.position.y;
+            if (y > 301.4){
+                PlaceObject();
+            }
         }
     }
 
@@ -90,5 +94,24 @@ public class placementIndicator : MonoBehaviour
         var result = promise.Result;
         db.AppendLogMessage(result.CloudAnchorState.ToString());
         db.AppendLogMessage(result.CloudAnchorId);
+    }
+
+    public void CreatePromiseResolveAnchor(string id)
+    {
+        ResolveCloudAnchorPromise cloudAnchorPromise = anchorManager.ResolveCloudAnchorAsync(id);
+        StartCoroutine(CheckResolveCloudAnchorPromise(cloudAnchorPromise));
+    }
+    private IEnumerator CheckResolveCloudAnchorPromise(ResolveCloudAnchorPromise promise)
+    {
+        yield return promise;
+        if (promise.State == PromiseState.Cancelled) yield break;
+        var result = promise.Result;
+        db.AppendLogMessage(result.CloudAnchorState.ToString());
+        db.AppendLogMessage(result.Anchor.pose.ToString());
+    }
+
+    public void test(){
+        CreatePromiseResolveAnchor("ua-3e2c5f3e235b7dbca3f7c75c693a21da");
+        db.AppendLogMessage("button pressed");
     }
 }
