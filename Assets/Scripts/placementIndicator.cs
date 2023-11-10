@@ -107,11 +107,14 @@ public class placementIndicator : MonoBehaviour
         if (promise.State == PromiseState.Cancelled) yield break;
         var result = promise.Result;
         db.AppendLogMessage(result.CloudAnchorState.ToString());
-        db.AppendLogMessage(result.Anchor.pose.ToString());
+        Pose pose = result.Anchor.pose;
+        db.AppendLogMessage(pose.ToString());
+        GameObject instantiatedImage = Instantiate(image, pose.position, pose.rotation);
+        instantiatedImage.transform.Rotate(90, 0, 0);
     }
 
     public void test(){
-        CreatePromiseResolveAnchor("ua-3e2c5f3e235b7dbca3f7c75c693a21da");
+        CreatePromiseResolveAnchor("ua-1f60cedc063f9b3dca3e1528d54c66c2");
         db.AppendLogMessage("button pressed");
     }
 }
