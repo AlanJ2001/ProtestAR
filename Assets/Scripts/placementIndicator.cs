@@ -20,11 +20,13 @@ public class placementIndicator : MonoBehaviour
     ARPlane plane;
 
     DebugManager db;
+    DatabaseManager database;
 
     // Start is called before the first frame update
     void Start()
     {
         db = FindObjectOfType<DebugManager>();
+        database = FindObjectOfType<DatabaseManager>();
         db.AppendLogMessage("start debugging");
     }
 
@@ -114,7 +116,8 @@ public class placementIndicator : MonoBehaviour
     }
 
     public void test(){
-        CreatePromiseResolveAnchor("ua-1f60cedc063f9b3dca3e1528d54c66c2");
-        db.AppendLogMessage("button pressed");
+        // CreatePromiseResolveAnchor("ua-1f60cedc063f9b3dca3e1528d54c66c2");
+        // db.AppendLogMessage("button pressed");
+        database.CreateCloudAnchor("cloud anchor test", 55.32, -4.05);
     }
 }
