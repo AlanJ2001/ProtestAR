@@ -19,4 +19,9 @@ public class DebugManager : MonoBehaviour
     {
         logText.text += message + "\n";
     }
+
+    public void UpdateLogMessage(string message)
+    {
+        logText.text = message;
+    }
 }

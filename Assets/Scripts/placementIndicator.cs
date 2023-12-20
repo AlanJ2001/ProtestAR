@@ -25,6 +25,10 @@ public class placementIndicator : MonoBehaviour
     List<ResolveCloudAnchorPromise> resolveRequests;
     List<string> previousCloudAnchorsList;
 
+    ARAnchor anchorToHost;
+
+    GameObject instantiatedImage;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -49,6 +53,15 @@ public class placementIndicator : MonoBehaviour
             }
         }
         FindAndResolveCloudAnchors();
+        Transform cameraTransform = Camera.main.transform;
+
+        // Get the position and rotation of the camera
+        Vector3 cameraPosition = cameraTransform.position;
+        Quaternion cameraRotation = cameraTransform.rotation;
+
+        // Create a Pose object using the camera position and rotation
+        Pose cameraPose = new Pose(cameraPosition, cameraRotation);
+        db.UpdateLogMessage(anchorManager.EstimateFeatureMapQualityForHosting(cameraPose).ToString());
     }
 
     private void FindAndResolveCloudAnchors()
@@ -71,13 +84,18 @@ public class placementIndicator : MonoBehaviour
 
     private void PlaceObject()
     {
-        GameObject instantiatedImage = Instantiate(image, hitPose.position, hitPose.rotation);
+        if (instantiatedImage != null)
+        {
+            Destroy(instantiatedImage);
+        }
+        instantiatedImage = Instantiate(image, hitPose.position, hitPose.rotation);
         instantiatedImage.transform.Rotate(90, 0, 0);
         instantiatedImage.AddComponent<ARAnchor>();
         ARAnchor _anchor = anchorManager.AttachAnchor(plane, hitPose);
         instantiatedImage.transform.SetParent(_anchor.transform);
         db.AppendLogMessage("anchor created");
-        CreatePromise(_anchor);
+        // CreatePromise(_anchor);
+        anchorToHost = _anchor;
     }
 
     private void UpdatePlacementIndicator() 
@@ -142,12 +160,7 @@ public class placementIndicator : MonoBehaviour
     }
 
     public void test(){
-        // CreatePromiseResolveAnchor("ua-1f60cedc063f9b3dca3e1528d54c66c2");
-        // db.AppendLogMessage("button pressed");
-        // database.CreateCloudAnchor("cloud anchor 2", 55.32, -4.05);
-        // StartCoroutine(database.GetAllIDs((List<string> alist) => {
-        //     string resultString = string.Join(", ", alist);
-        //     db.AppendLogMessage(resultString);
-        // }));
+        CreatePromise(anchorToHost);
+        anchorToHost = null;
     }
 }
