@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using Google.XR.ARCoreExtensions;
+using System.Linq;
 
 public class placementIndicator : MonoBehaviour
 {
@@ -21,6 +22,8 @@ public class placementIndicator : MonoBehaviour
 
     DebugManager db;
     DatabaseManager database;
+    List<ResolveCloudAnchorPromise> resolveRequests;
+    List<string> previousCloudAnchorsList;
 
     // Start is called before the first frame update
     void Start()
@@ -28,6 +31,8 @@ public class placementIndicator : MonoBehaviour
         db = FindObjectOfType<DebugManager>();
         database = FindObjectOfType<DatabaseManager>();
         db.AppendLogMessage("start debugging");
+        resolveRequests = new List<ResolveCloudAnchorPromise>();
+        previousCloudAnchorsList = new List<string>();
     }
 
     // Update is called once per frame
@@ -43,6 +48,25 @@ public class placementIndicator : MonoBehaviour
                 PlaceObject();
             }
         }
+        FindAndResolveCloudAnchors();
+    }
+
+    private void FindAndResolveCloudAnchors()
+    {
+        StartCoroutine(database.GetAllIDs((List<string> cloudAnchorsList) => {
+        if (!previousCloudAnchorsList.SequenceEqual(cloudAnchorsList)){
+            foreach (ResolveCloudAnchorPromise item in resolveRequests)
+            {
+                item.Cancel();
+            }
+            resolveRequests = new List<ResolveCloudAnchorPromise>();
+            foreach (string item in cloudAnchorsList)
+            {
+                CreatePromiseResolveAnchor(item);
+            }
+            previousCloudAnchorsList = new List<string>(cloudAnchorsList);
+        }
+    }));
     }
 
     private void PlaceObject()
@@ -96,11 +120,13 @@ public class placementIndicator : MonoBehaviour
         var result = promise.Result;
         db.AppendLogMessage(result.CloudAnchorState.ToString());
         db.AppendLogMessage(result.CloudAnchorId);
+        database.CreateCloudAnchor(result.CloudAnchorId, 55.32, -4.05);
     }
 
     public void CreatePromiseResolveAnchor(string id)
     {
         ResolveCloudAnchorPromise cloudAnchorPromise = anchorManager.ResolveCloudAnchorAsync(id);
+        resolveRequests.Add(cloudAnchorPromise);
         StartCoroutine(CheckResolveCloudAnchorPromise(cloudAnchorPromise));
     }
     private IEnumerator CheckResolveCloudAnchorPromise(ResolveCloudAnchorPromise promise)
@@ -118,6 +144,10 @@ public class placementIndicator : MonoBehaviour
     public void test(){
         // CreatePromiseResolveAnchor("ua-1f60cedc063f9b3dca3e1528d54c66c2");
         // db.AppendLogMessage("button pressed");
-        database.CreateCloudAnchor("cloud anchor test", 55.32, -4.05);
+        // database.CreateCloudAnchor("cloud anchor 2", 55.32, -4.05);
+        // StartCoroutine(database.GetAllIDs((List<string> alist) => {
+        //     string resultString = string.Join(", ", alist);
+        //     db.AppendLogMessage(resultString);
+        // }));
     }
 }
