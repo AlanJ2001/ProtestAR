@@ -61,7 +61,7 @@ public class placementIndicator : MonoBehaviour
 
         // Create a Pose object using the camera position and rotation
         Pose cameraPose = new Pose(cameraPosition, cameraRotation);
-        db.UpdateLogMessage(anchorManager.EstimateFeatureMapQualityForHosting(cameraPose).ToString());
+        // db.UpdateLogMessage(anchorManager.EstimateFeatureMapQualityForHosting(cameraPose).ToString());
     }
 
     private void FindAndResolveCloudAnchors()
