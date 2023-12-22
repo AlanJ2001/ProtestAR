@@ -15,21 +15,15 @@ public class placementIndicator : MonoBehaviour
     private bool placementPoseIsValid = false; 
     private Pose hitPose;
     public GameObject image;
-
     public ARAnchorManager anchorManager;
-
     ARPlane plane;
-
     DebugManager db;
     DatabaseManager database;
     List<ResolveCloudAnchorPromise> resolveRequests;
     List<string> previousCloudAnchorsList;
-
     ARAnchor anchorToHost;
-
     GameObject instantiatedImage;
 
-    // Start is called before the first frame update
     void Start()
     {
         db = FindObjectOfType<DebugManager>();
@@ -39,7 +33,6 @@ public class placementIndicator : MonoBehaviour
         previousCloudAnchorsList = new List<string>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         UpdatePlacementPose();
@@ -53,13 +46,14 @@ public class placementIndicator : MonoBehaviour
             }
         }
         FindAndResolveCloudAnchors();
-        Transform cameraTransform = Camera.main.transform;
+        LogFeatureMapQuality();
+    }
 
-        // Get the position and rotation of the camera
+    private void LogFeatureMapQuality()
+    {
+        Transform cameraTransform = Camera.main.transform;
         Vector3 cameraPosition = cameraTransform.position;
         Quaternion cameraRotation = cameraTransform.rotation;
-
-        // Create a Pose object using the camera position and rotation
         Pose cameraPose = new Pose(cameraPosition, cameraRotation);
         // db.UpdateLogMessage(anchorManager.EstimateFeatureMapQualityForHosting(cameraPose).ToString());
     }
@@ -67,19 +61,20 @@ public class placementIndicator : MonoBehaviour
     private void FindAndResolveCloudAnchors()
     {
         StartCoroutine(database.GetAllIDs((List<string> cloudAnchorsList) => {
-        if (!previousCloudAnchorsList.SequenceEqual(cloudAnchorsList)){
-            foreach (ResolveCloudAnchorPromise item in resolveRequests)
+            if (!previousCloudAnchorsList.SequenceEqual(cloudAnchorsList))
             {
-                item.Cancel();
+                foreach (ResolveCloudAnchorPromise item in resolveRequests)
+                {
+                    item.Cancel();
+                }
+                resolveRequests = new List<ResolveCloudAnchorPromise>();
+                foreach (string item in cloudAnchorsList)
+                {
+                    CreatePromiseResolveAnchor(item);
+                }
+                previousCloudAnchorsList = new List<string>(cloudAnchorsList);
             }
-            resolveRequests = new List<ResolveCloudAnchorPromise>();
-            foreach (string item in cloudAnchorsList)
-            {
-                CreatePromiseResolveAnchor(item);
-            }
-            previousCloudAnchorsList = new List<string>(cloudAnchorsList);
-        }
-    }));
+        }));
     }
 
     private void PlaceObject()
@@ -131,6 +126,7 @@ public class placementIndicator : MonoBehaviour
         HostCloudAnchorPromise cloudAnchorPromise = anchorManager.HostCloudAnchorAsync(_anchor, 1);
         StartCoroutine(CheckCloudAnchorPromise(cloudAnchorPromise));
     }
+
     private IEnumerator CheckCloudAnchorPromise(HostCloudAnchorPromise promise)
     {
         yield return promise;
@@ -147,6 +143,7 @@ public class placementIndicator : MonoBehaviour
         resolveRequests.Add(cloudAnchorPromise);
         StartCoroutine(CheckResolveCloudAnchorPromise(cloudAnchorPromise));
     }
+    
     private IEnumerator CheckResolveCloudAnchorPromise(ResolveCloudAnchorPromise promise)
     {
         yield return promise;
