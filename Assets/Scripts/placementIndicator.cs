@@ -23,6 +23,7 @@ public class placementIndicator : MonoBehaviour
     List<string> previousCloudAnchorsList;
     ARAnchor anchorToHost;
     GameObject instantiatedImage;
+    public UploadFile uploadFileScript;
 
     void Start()
     {
@@ -91,6 +92,22 @@ public class placementIndicator : MonoBehaviour
         db.AppendLogMessage("anchor created");
         // CreatePromise(_anchor);
         anchorToHost = _anchor;
+
+        Texture2D uploadedTexture = new Texture2D(2, 2); // You may need to adjust the size
+        uploadedTexture.LoadImage(uploadFileScript.bytes);
+
+        if (instantiatedImage != null)
+        {
+            Renderer renderer = instantiatedImage.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                Material material = renderer.material;
+                if (material != null)
+                {
+                    material.mainTexture = uploadedTexture;
+                }
+            }
+        }
     }
 
     private void UpdatePlacementIndicator() 

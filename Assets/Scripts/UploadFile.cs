@@ -12,6 +12,7 @@ public class UploadFile : MonoBehaviour
 {
     FirebaseStorage storage;
     StorageReference storageReference;
+    public byte[] bytes;
 
     // public placementIndicator placementIndicatorScript;
 
@@ -47,7 +48,7 @@ public class UploadFile : MonoBehaviour
 			for( int i = 0; i < FileBrowser.Result.Length; i++ )
 				Debug.Log( FileBrowser.Result[i] );
 
-			byte[] bytes = FileBrowserHelpers.ReadBytesFromFile( FileBrowser.Result[0] );
+			bytes = FileBrowserHelpers.ReadBytesFromFile( FileBrowser.Result[0] );
 
 			// string destinationPath = Path.Combine( Application.persistentDataPath, FileBrowserHelpers.GetFilename( FileBrowser.Result[0] ) );
 			// FileBrowserHelpers.CopyFile( FileBrowser.Result[0], destinationPath );
@@ -56,7 +57,7 @@ public class UploadFile : MonoBehaviour
             var newMetadata = new MetadataChange();
             newMetadata.ContentType = "image/jpeg";
 
-            StorageReference uploadRef = storageReference.Child("uploads/newFile.jpeg");
+            StorageReference uploadRef = storageReference.Child("uploads/" + GetTimeWithRandomDigits() + ".jpeg");
             Debug.Log("File upload started");
             uploadRef.PutBytesAsync(bytes, newMetadata).ContinueWithOnMainThread((task) => {
                 if (task.IsFaulted || task.IsCanceled){
@@ -64,26 +65,37 @@ public class UploadFile : MonoBehaviour
                 }
                 else{
                     Debug.Log("File uploaded successfully");
-                    // placementIndicatorScript.image = YourConversionMethod(bytes);
                 }
             });
 		}
 	}
 
-    // private GameObject YourConversionMethod(byte[] bytes)
-    // {
-    //     // Implement your conversion logic here
-    //     // For example, create a new GameObject with a SpriteRenderer
-    //     GameObject imageObject = new GameObject("ImageObject");
-    //     SpriteRenderer spriteRenderer = imageObject.AddComponent<SpriteRenderer>();
-        
-    //     // Load the image bytes into a Texture2D
-    //     Texture2D texture = new Texture2D(2, 2);
-    //     texture.LoadImage(bytes);
-        
-    //     // Assign the texture to the SpriteRenderer
-    //     spriteRenderer.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * 0.5f);
+    // Call this function to get the concatenated string
+    private string GetTimeWithRandomDigits()
+    {
+        // Get the current time as a string
+        string currentTime = System.DateTime.Now.ToString("HH:mm:ss");
 
-    //     return imageObject;
-    // }
+        // Generate a random string of digits with length 5
+        string randomDigits = GenerateRandomDigits(5);
+
+        // Concatenate the time and random digits
+        string result = currentTime + randomDigits;
+
+        return result;
+    }
+
+    // Function to generate a random string of digits with a specified length
+    private string GenerateRandomDigits(int length)
+    {
+        System.Random random = new System.Random();
+        string randomDigits = "";
+
+        for (int i = 0; i < length; i++)
+        {
+            randomDigits += random.Next(0, 10).ToString();
+        }
+
+        return randomDigits;
+    }
 }

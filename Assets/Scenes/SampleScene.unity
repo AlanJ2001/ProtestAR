@@ -1020,6 +1020,7 @@ MonoBehaviour:
   indicator: {fileID: 876113575}
   image: {fileID: 1113749397506836811, guid: c8e854ebf2c2199478c4a506d336d043, type: 3}
   anchorManager: {fileID: 1325883369}
+  uploadFileScript: {fileID: 1916134050}
 --- !u!114 &1325883368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1367,6 +1368,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 33d2139fd33623c4cb18105b8f860162, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  myName: 
+  bytes: 
 --- !u!114 &1916134051
 MonoBehaviour:
   m_ObjectHideFlags: 0
