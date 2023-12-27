@@ -13,6 +13,7 @@ public class UploadFile : MonoBehaviour
     FirebaseStorage storage;
     StorageReference storageReference;
     public byte[] bytes;
+    public string filename;
 
     // public placementIndicator placementIndicatorScript;
 
@@ -52,23 +53,30 @@ public class UploadFile : MonoBehaviour
 
 			// string destinationPath = Path.Combine( Application.persistentDataPath, FileBrowserHelpers.GetFilename( FileBrowser.Result[0] ) );
 			// FileBrowserHelpers.CopyFile( FileBrowser.Result[0], destinationPath );
-
-            //Editing Metadata
-            var newMetadata = new MetadataChange();
-            newMetadata.ContentType = "image/jpeg";
-
-            StorageReference uploadRef = storageReference.Child("uploads/" + GetTimeWithRandomDigits() + ".jpeg");
-            Debug.Log("File upload started");
-            uploadRef.PutBytesAsync(bytes, newMetadata).ContinueWithOnMainThread((task) => {
-                if (task.IsFaulted || task.IsCanceled){
-                    Debug.Log(task.Exception.ToString());
-                }
-                else{
-                    Debug.Log("File uploaded successfully");
-                }
-            });
 		}
 	}
+
+    public void uploadSelectedImage()
+    {
+        //Editing Metadata
+        var newMetadata = new MetadataChange();
+        newMetadata.ContentType = "image/jpeg";
+
+        filename = "uploads/" + GetTimeWithRandomDigits() + ".jpeg";
+
+        StorageReference uploadRef = storageReference.Child(filename);
+        Debug.Log("File upload started");
+        uploadRef.PutBytesAsync(bytes, newMetadata).ContinueWithOnMainThread((task) => {
+            if (task.IsFaulted || task.IsCanceled)
+            {
+                Debug.Log(task.Exception.ToString());
+            }
+            else
+            {
+                Debug.Log("File uploaded successfully");
+            }
+        });
+    }
 
     // Call this function to get the concatenated string
     private string GetTimeWithRandomDigits()

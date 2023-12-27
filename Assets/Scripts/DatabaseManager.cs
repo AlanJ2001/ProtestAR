@@ -22,9 +22,9 @@ public class DatabaseManager : MonoBehaviour
 
     }
 
-    public void CreateCloudAnchor(string cloudAnchorID, double latitude, double longitude)
+    public void CreateCloudAnchor(string cloudAnchorID, double latitude, double longitude, string imageFileName)
     {
-        CloudAnchor newCloudAnchor = new CloudAnchor(cloudAnchorID, latitude, longitude);
+        CloudAnchor newCloudAnchor = new CloudAnchor(cloudAnchorID, latitude, longitude, imageFileName);
         string json = JsonUtility.ToJson(newCloudAnchor);
         db.AppendLogMessage(json);
         dbreference.Child("cloud anchors").Child(cloudAnchorID).SetRawJsonValueAsync(json);
@@ -42,7 +42,7 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
-    public IEnumerator GetAllIDs(System.Action<List<string>> onCallback)
+    public IEnumerator GetAllIDs(System.Action<List<Dictionary<string, string>>> onCallback)
     {
         var cloudAnchorsRef = dbreference.Child("cloud anchors");
 
@@ -56,12 +56,19 @@ public class DatabaseManager : MonoBehaviour
         else
         {
             DataSnapshot snapshot = cloudAnchorIDTask.Result;
-            List<string> cloudAnchorIDs = new List<string>();
+            List<Dictionary<string, string>> cloudAnchorIDs = new List<Dictionary<string, string>>();
+
 
             foreach (var childSnapshot in snapshot.Children)
             {
                 string anchorID = childSnapshot.Child("cloudAnchorID").Value.ToString();
-                cloudAnchorIDs.Add(anchorID);
+                string filename = childSnapshot.Child("imageFileName").Value.ToString();
+                Dictionary<string, string> anchorData = new Dictionary<string, string>
+                {
+                    { "cloudAnchorID", anchorID },
+                    { "filename", filename }
+                };
+                cloudAnchorIDs.Add(anchorData);
             }
 
             onCallback.Invoke(cloudAnchorIDs);

@@ -42,7 +42,8 @@ public class placementIndicator : MonoBehaviour
         {
             Touch touch = Input.GetTouch(0);
             float y = touch.position.y;
-            if (y > 301.4){
+            if (y > 301.4)
+            {
                 PlaceObject();
             }
         }
@@ -61,19 +62,21 @@ public class placementIndicator : MonoBehaviour
 
     private void FindAndResolveCloudAnchors()
     {
-        StartCoroutine(database.GetAllIDs((List<string> cloudAnchorsList) => {
-            if (!previousCloudAnchorsList.SequenceEqual(cloudAnchorsList))
+        StartCoroutine(database.GetAllIDs((List<Dictionary<string, string>> cloudAnchorsList) => 
+        {
+            List<string> idList = cloudAnchorsList.Select(item => item["cloudAnchorID"]).ToList();
+            if (!previousCloudAnchorsList.SequenceEqual(idList))
             {
                 foreach (ResolveCloudAnchorPromise item in resolveRequests)
                 {
                     item.Cancel();
                 }
                 resolveRequests = new List<ResolveCloudAnchorPromise>();
-                foreach (string item in cloudAnchorsList)
+                foreach (Dictionary<string, string> item in cloudAnchorsList)
                 {
-                    CreatePromiseResolveAnchor(item);
+                    CreatePromiseResolveAnchor(item["cloudAnchorID"]);
                 }
-                previousCloudAnchorsList = new List<string>(cloudAnchorsList);
+                previousCloudAnchorsList = new List<string>(idList);
             }
         }));
     }
@@ -151,7 +154,8 @@ public class placementIndicator : MonoBehaviour
         var result = promise.Result;
         db.AppendLogMessage(result.CloudAnchorState.ToString());
         db.AppendLogMessage(result.CloudAnchorId);
-        database.CreateCloudAnchor(result.CloudAnchorId, 55.32, -4.05);
+        uploadFileScript.uploadSelectedImage();
+        database.CreateCloudAnchor(result.CloudAnchorId, 55.32, -4.05, uploadFileScript.filename);
     }
 
     public void CreatePromiseResolveAnchor(string id)
