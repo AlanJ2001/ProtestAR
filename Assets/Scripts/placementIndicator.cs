@@ -5,6 +5,11 @@ using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using Google.XR.ARCoreExtensions;
 using System.Linq;
+using Firebase;
+using Firebase.Extensions;
+using Firebase.Storage;
+using UnityEngine.UI;
+using UnityEngine.Networking;
 
 public class placementIndicator : MonoBehaviour
 {
@@ -24,6 +29,8 @@ public class placementIndicator : MonoBehaviour
     ARAnchor anchorToHost;
     GameObject instantiatedImage;
     public UploadFile uploadFileScript;
+    FirebaseStorage storage;
+    StorageReference storageReference;
 
     void Start()
     {
@@ -32,6 +39,8 @@ public class placementIndicator : MonoBehaviour
         db.AppendLogMessage("start debugging");
         resolveRequests = new List<ResolveCloudAnchorPromise>();
         previousCloudAnchorsList = new List<string>();
+        storage = FirebaseStorage.DefaultInstance;
+        storageReference = storage.GetReferenceFromUrl("gs://ar-projects-403118.appspot.com");
     }
 
     void Update()
@@ -74,7 +83,7 @@ public class placementIndicator : MonoBehaviour
                 resolveRequests = new List<ResolveCloudAnchorPromise>();
                 foreach (Dictionary<string, string> item in cloudAnchorsList)
                 {
-                    CreatePromiseResolveAnchor(item["cloudAnchorID"]);
+                    CreatePromiseResolveAnchor(item["cloudAnchorID"], item["filename"]);
                 }
                 previousCloudAnchorsList = new List<string>(idList);
             }
@@ -158,14 +167,14 @@ public class placementIndicator : MonoBehaviour
         database.CreateCloudAnchor(result.CloudAnchorId, 55.32, -4.05, uploadFileScript.filename);
     }
 
-    public void CreatePromiseResolveAnchor(string id)
+    public void CreatePromiseResolveAnchor(string id, string filename)
     {
         ResolveCloudAnchorPromise cloudAnchorPromise = anchorManager.ResolveCloudAnchorAsync(id);
         resolveRequests.Add(cloudAnchorPromise);
-        StartCoroutine(CheckResolveCloudAnchorPromise(cloudAnchorPromise));
+        StartCoroutine(CheckResolveCloudAnchorPromise(cloudAnchorPromise, filename));
     }
     
-    private IEnumerator CheckResolveCloudAnchorPromise(ResolveCloudAnchorPromise promise)
+    private IEnumerator CheckResolveCloudAnchorPromise(ResolveCloudAnchorPromise promise, string filename)
     {
         yield return promise;
         if (promise.State == PromiseState.Cancelled) yield break;
@@ -173,8 +182,53 @@ public class placementIndicator : MonoBehaviour
         db.AppendLogMessage(result.CloudAnchorState.ToString());
         Pose pose = result.Anchor.pose;
         db.AppendLogMessage(pose.ToString());
-        GameObject instantiatedImage = Instantiate(image, pose.position, pose.rotation);
-        instantiatedImage.transform.Rotate(90, 0, 0);
+
+        StorageReference image = storageReference.Child(filename);
+        db.AppendLogMessage(filename);
+        db.AppendLogMessage("filename above");
+
+        image.GetDownloadUrlAsync().ContinueWithOnMainThread(task => 
+        {
+            if (!task.IsFaulted && !task.IsCanceled)
+            {
+                StartCoroutine(LoadImage(task.Result.ToString(), pose));
+            }
+            else
+            {
+                Debug.Log(task.Exception);
+            }
+        });
+
+        // GameObject instantiatedImage = Instantiate(image, pose.position, pose.rotation);
+        // instantiatedImage.transform.Rotate(90, 0, 0);
+    }
+
+    IEnumerator LoadImage(string MediaUrl, Pose pose)
+    {
+        UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
+        yield return request.SendWebRequest();
+        if (request.isNetworkError || request.isHttpError)
+        {
+            Debug.Log(request.error);
+        }
+        else
+        {
+            GameObject instantiatedImage = Instantiate(image, pose.position, pose.rotation);
+            instantiatedImage.transform.Rotate(90, 0, 0);
+            if (instantiatedImage != null)
+            {
+                Renderer renderer = instantiatedImage.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    Material material = renderer.material;
+                    if (material != null)
+                    {
+                        material.mainTexture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+                    }
+                }
+            }
+            // rawImage.texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+        }
     }
 
     public void test(){
