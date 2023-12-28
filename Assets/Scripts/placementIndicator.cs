@@ -31,6 +31,7 @@ public class placementIndicator : MonoBehaviour
     public UploadFile uploadFileScript;
     FirebaseStorage storage;
     StorageReference storageReference;
+    HashSet<string> instantiatedAnchorsSet;
 
     void Start()
     {
@@ -41,6 +42,7 @@ public class placementIndicator : MonoBehaviour
         previousCloudAnchorsList = new List<string>();
         storage = FirebaseStorage.DefaultInstance;
         storageReference = storage.GetReferenceFromUrl("gs://ar-projects-403118.appspot.com");
+        instantiatedAnchorsSet = new HashSet<string>();
     }
 
     void Update()
@@ -83,7 +85,10 @@ public class placementIndicator : MonoBehaviour
                 resolveRequests = new List<ResolveCloudAnchorPromise>();
                 foreach (Dictionary<string, string> item in cloudAnchorsList)
                 {
-                    CreatePromiseResolveAnchor(item["cloudAnchorID"], item["filename"]);
+                    if (!instantiatedAnchorsSet.Contains(item["cloudAnchorID"]))
+                    {
+                        CreatePromiseResolveAnchor(item["cloudAnchorID"], item["filename"]);
+                    }
                 }
                 previousCloudAnchorsList = new List<string>(idList);
             }
@@ -165,16 +170,29 @@ public class placementIndicator : MonoBehaviour
         db.AppendLogMessage(result.CloudAnchorId);
         uploadFileScript.uploadSelectedImage();
         database.CreateCloudAnchor(result.CloudAnchorId, 55.32, -4.05, uploadFileScript.filename);
+        ResetScene();
+    }
+
+    private void ResetScene()
+    {
+        GameObject[] imagePrefabs = GameObject.FindGameObjectsWithTag("imagePrefab");
+
+        foreach (GameObject imagePrefab in imagePrefabs)
+        {
+            Destroy(imagePrefab);
+        }
+        previousCloudAnchorsList = new List<string>();
+        instantiatedAnchorsSet = new HashSet<string>();
     }
 
     public void CreatePromiseResolveAnchor(string id, string filename)
     {
         ResolveCloudAnchorPromise cloudAnchorPromise = anchorManager.ResolveCloudAnchorAsync(id);
         resolveRequests.Add(cloudAnchorPromise);
-        StartCoroutine(CheckResolveCloudAnchorPromise(cloudAnchorPromise, filename));
+        StartCoroutine(CheckResolveCloudAnchorPromise(cloudAnchorPromise, filename, id));
     }
     
-    private IEnumerator CheckResolveCloudAnchorPromise(ResolveCloudAnchorPromise promise, string filename)
+    private IEnumerator CheckResolveCloudAnchorPromise(ResolveCloudAnchorPromise promise, string filename, string id)
     {
         yield return promise;
         if (promise.State == PromiseState.Cancelled) yield break;
@@ -191,7 +209,7 @@ public class placementIndicator : MonoBehaviour
         {
             if (!task.IsFaulted && !task.IsCanceled)
             {
-                StartCoroutine(LoadImage(task.Result.ToString(), pose));
+                StartCoroutine(LoadImage(task.Result.ToString(), pose, id));
             }
             else
             {
@@ -203,7 +221,7 @@ public class placementIndicator : MonoBehaviour
         // instantiatedImage.transform.Rotate(90, 0, 0);
     }
 
-    IEnumerator LoadImage(string MediaUrl, Pose pose)
+    IEnumerator LoadImage(string MediaUrl, Pose pose, string id)
     {
         UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
         yield return request.SendWebRequest();
@@ -215,6 +233,7 @@ public class placementIndicator : MonoBehaviour
         {
             GameObject instantiatedImage = Instantiate(image, pose.position, pose.rotation);
             instantiatedImage.transform.Rotate(90, 0, 0);
+            instantiatedAnchorsSet.Add(id);
             if (instantiatedImage != null)
             {
                 Renderer renderer = instantiatedImage.GetComponent<Renderer>();
