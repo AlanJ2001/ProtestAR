@@ -27,7 +27,7 @@ public class placementIndicator : MonoBehaviour
     List<ResolveCloudAnchorPromise> resolveRequests;
     List<string> previousCloudAnchorsList;
     ARAnchor anchorToHost;
-    GameObject instantiatedImage;
+    public GameObject instantiatedImage;
     public UploadFile uploadFileScript;
     FirebaseStorage storage;
     StorageReference storageReference;
