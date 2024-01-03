@@ -14,11 +14,14 @@ public class UploadFile : MonoBehaviour
     StorageReference storageReference;
     public byte[] bytes;
     public string filename;
+    DebugManager db;
+    public string FinalPath;
 
     // public placementIndicator placementIndicatorScript;
 
     void Start()
 	{
+        db = FindObjectOfType<DebugManager>();
 		FileBrowser.SetFilters( true, new FileBrowser.Filter( "Images", ".jpg", ".png" ), new FileBrowser.Filter( "Text Files", ".txt", ".pdf" ) );
 
 		FileBrowser.SetDefaultFilter( ".jpg" );
@@ -34,7 +37,28 @@ public class UploadFile : MonoBehaviour
 
     public void OnButtonClick()
     {
-        StartCoroutine( ShowLoadDialogCoroutine());
+        // StartCoroutine( ShowLoadDialogCoroutine());
+        LoadFile();
+    }
+
+    public void LoadFile()
+    {
+        // string fileType = NativeFilePicker.ConvertExtensionToFileType("jpg");
+        
+        NativeFilePicker.Permission permission = NativeFilePicker.PickFile((path) =>
+        {
+            if (path == null)
+            {
+                Debug.Log("Operation Cancelled");
+            }
+            else
+            {
+                FinalPath = path;
+                db.AppendLogMessage(FinalPath);
+                bytes = File.ReadAllBytes(FinalPath);
+            }
+        }, NativeFilePicker.ConvertExtensionToFileType("png"), NativeFilePicker.ConvertExtensionToFileType("jpg"));
+
     }
 
 
@@ -50,6 +74,7 @@ public class UploadFile : MonoBehaviour
 				Debug.Log( FileBrowser.Result[i] );
 
 			bytes = FileBrowserHelpers.ReadBytesFromFile( FileBrowser.Result[0] );
+            db.AppendLogMessage(FileBrowser.Result[0]);
 
 			// string destinationPath = Path.Combine( Application.persistentDataPath, FileBrowserHelpers.GetFilename( FileBrowser.Result[0] ) );
 			// FileBrowserHelpers.CopyFile( FileBrowser.Result[0], destinationPath );
