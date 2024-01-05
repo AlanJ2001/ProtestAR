@@ -32,6 +32,7 @@ public class placementIndicator : MonoBehaviour
     FirebaseStorage storage;
     StorageReference storageReference;
     HashSet<string> instantiatedAnchorsSet;
+    public Quaternion initialRotation;
 
     void Start()
     {
@@ -103,6 +104,7 @@ public class placementIndicator : MonoBehaviour
         }
         instantiatedImage = Instantiate(image, hitPose.position, hitPose.rotation);
         instantiatedImage.transform.Rotate(90, 0, 0);
+        initialRotation = instantiatedImage.transform.rotation;
         instantiatedImage.AddComponent<ARAnchor>();
         ARAnchor _anchor = anchorManager.AttachAnchor(plane, hitPose);
         instantiatedImage.transform.SetParent(_anchor.transform);

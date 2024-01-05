@@ -18,13 +18,14 @@ public class RotateAndScaleSlider : MonoBehaviour
     void Start()
     {
         originalScale = new Vector3(1, 1, 1);
-        initialRotation = Quaternion.Euler(90, 0, 0);
+        // initialRotation = Quaternion.Euler(90, 0, 0);
         db = FindObjectOfType<DebugManager>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        initialRotation = placementIndicatorScript.initialRotation;
         angleSliderNumber = rotationSlider.value * 360f;
         if (placementIndicatorScript.instantiatedImage != null)
         {
