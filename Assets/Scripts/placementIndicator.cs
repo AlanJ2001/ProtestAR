@@ -33,6 +33,8 @@ public class placementIndicator : MonoBehaviour
     StorageReference storageReference;
     HashSet<string> instantiatedAnchorsSet;
     public Quaternion initialRotation;
+    public Slider rotationSlider;
+    public Slider scaleSlider;
 
     void Start()
     {
@@ -88,7 +90,10 @@ public class placementIndicator : MonoBehaviour
                 {
                     if (!instantiatedAnchorsSet.Contains(item["cloudAnchorID"]))
                     {
-                        CreatePromiseResolveAnchor(item["cloudAnchorID"], item["filename"]);
+                        db.AppendLogMessage(item["cloudAnchorID"]);
+                        db.AppendLogMessage(item["angleSliderNumber"]);
+                        db.AppendLogMessage(item["scaleSliderNumber"]);
+                        CreatePromiseResolveAnchor(item["cloudAnchorID"], item["filename"], item["angleSliderNumber"], item["scaleSliderNumber"]);
                     }
                 }
                 previousCloudAnchorsList = new List<string>(idList);
@@ -171,7 +176,7 @@ public class placementIndicator : MonoBehaviour
         db.AppendLogMessage(result.CloudAnchorState.ToString());
         db.AppendLogMessage(result.CloudAnchorId);
         uploadFileScript.uploadSelectedImage();
-        database.CreateCloudAnchor(result.CloudAnchorId, 55.32, -4.05, uploadFileScript.filename);
+        database.CreateCloudAnchor(result.CloudAnchorId, 55.32, -4.05, uploadFileScript.filename, rotationSlider.value * 360f, scaleSlider.value);
         ResetScene();
     }
 
@@ -187,14 +192,14 @@ public class placementIndicator : MonoBehaviour
         instantiatedAnchorsSet = new HashSet<string>();
     }
 
-    public void CreatePromiseResolveAnchor(string id, string filename)
+    public void CreatePromiseResolveAnchor(string id, string filename, string angleSliderNumber, string scaleSliderNumber)
     {
         ResolveCloudAnchorPromise cloudAnchorPromise = anchorManager.ResolveCloudAnchorAsync(id);
         resolveRequests.Add(cloudAnchorPromise);
-        StartCoroutine(CheckResolveCloudAnchorPromise(cloudAnchorPromise, filename, id));
+        StartCoroutine(CheckResolveCloudAnchorPromise(cloudAnchorPromise, filename, id, angleSliderNumber, scaleSliderNumber));
     }
     
-    private IEnumerator CheckResolveCloudAnchorPromise(ResolveCloudAnchorPromise promise, string filename, string id)
+    private IEnumerator CheckResolveCloudAnchorPromise(ResolveCloudAnchorPromise promise, string filename, string id, string angleSliderNumber, string scaleSliderNumber)
     {
         yield return promise;
         if (promise.State == PromiseState.Cancelled) yield break;
@@ -211,7 +216,7 @@ public class placementIndicator : MonoBehaviour
         {
             if (!task.IsFaulted && !task.IsCanceled)
             {
-                StartCoroutine(LoadImage(task.Result.ToString(), pose, id));
+                StartCoroutine(LoadImage(task.Result.ToString(), pose, id, angleSliderNumber, scaleSliderNumber));
             }
             else
             {
@@ -223,7 +228,7 @@ public class placementIndicator : MonoBehaviour
         // instantiatedImage.transform.Rotate(90, 0, 0);
     }
 
-    IEnumerator LoadImage(string MediaUrl, Pose pose, string id)
+    IEnumerator LoadImage(string MediaUrl, Pose pose, string id, string angleSliderNumber, string scaleSliderNumber)
     {
         UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
         yield return request.SendWebRequest();
@@ -235,6 +240,18 @@ public class placementIndicator : MonoBehaviour
         {
             GameObject instantiatedImage = Instantiate(image, pose.position, pose.rotation);
             instantiatedImage.transform.Rotate(90, 0, 0);
+
+            //adjust rotation and scale of image
+            Quaternion initialRotation = instantiatedImage.transform.rotation;
+
+            instantiatedImage.transform.rotation = Quaternion.identity;
+            Quaternion newRotation = Quaternion.AngleAxis(float.Parse(angleSliderNumber), instantiatedImage.transform.forward);
+            instantiatedImage.transform.rotation = initialRotation * newRotation;
+
+            Vector3 originalScale = new Vector3(1, 1, 1);
+            Vector3 newScale = originalScale * float.Parse(scaleSliderNumber);
+            instantiatedImage.transform.localScale = newScale;
+
             instantiatedAnchorsSet.Add(id);
             if (instantiatedImage != null)
             {

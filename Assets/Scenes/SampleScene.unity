@@ -1509,6 +1509,9 @@ MonoBehaviour:
   anchorManager: {fileID: 1325883369}
   instantiatedImage: {fileID: 0}
   uploadFileScript: {fileID: 1916134050}
+  initialRotation: {x: 0, y: 0, z: 0, w: 0}
+  rotationSlider: {fileID: 165585585}
+  scaleSlider: {fileID: 1985308837}
 --- !u!114 &1325883368
 MonoBehaviour:
   m_ObjectHideFlags: 0

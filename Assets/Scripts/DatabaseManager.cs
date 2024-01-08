@@ -22,9 +22,9 @@ public class DatabaseManager : MonoBehaviour
 
     }
 
-    public void CreateCloudAnchor(string cloudAnchorID, double latitude, double longitude, string imageFileName)
+    public void CreateCloudAnchor(string cloudAnchorID, double latitude, double longitude, string imageFileName, double angleSliderNumber, double scaleSliderNumber)
     {
-        CloudAnchor newCloudAnchor = new CloudAnchor(cloudAnchorID, latitude, longitude, imageFileName);
+        CloudAnchor newCloudAnchor = new CloudAnchor(cloudAnchorID, latitude, longitude, imageFileName, angleSliderNumber, scaleSliderNumber);
         string json = JsonUtility.ToJson(newCloudAnchor);
         db.AppendLogMessage(json);
         dbreference.Child("cloud anchors").Child(cloudAnchorID).SetRawJsonValueAsync(json);
@@ -63,10 +63,14 @@ public class DatabaseManager : MonoBehaviour
             {
                 string anchorID = childSnapshot.Child("cloudAnchorID").Value.ToString();
                 string filename = childSnapshot.Child("imageFileName").Value.ToString();
+                string angleSliderNumber = childSnapshot.Child("angleSliderNumber").Value.ToString();
+                string scaleSliderNumber = childSnapshot.Child("scaleSliderNumber").Value.ToString();
                 Dictionary<string, string> anchorData = new Dictionary<string, string>
                 {
                     { "cloudAnchorID", anchorID },
-                    { "filename", filename }
+                    { "filename", filename },
+                    { "angleSliderNumber", angleSliderNumber },
+                    { "scaleSliderNumber", scaleSliderNumber },
                 };
                 cloudAnchorIDs.Add(anchorData);
             }
