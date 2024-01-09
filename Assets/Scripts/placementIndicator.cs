@@ -117,8 +117,8 @@ public class placementIndicator : MonoBehaviour
         // CreatePromise(_anchor);
         anchorToHost = _anchor;
 
-        Texture2D uploadedTexture = new Texture2D(2, 2); // You may need to adjust the size
-        uploadedTexture.LoadImage(uploadFileScript.bytes);
+        // Texture2D uploadedTexture = new Texture2D(2, 2); // You may need to adjust the size
+        // uploadedTexture.LoadImage(uploadFileScript.bytes);
 
         if (instantiatedImage != null)
         {
@@ -128,7 +128,7 @@ public class placementIndicator : MonoBehaviour
                 Material material = renderer.material;
                 if (material != null)
                 {
-                    material.mainTexture = uploadedTexture;
+                    material.mainTexture = uploadFileScript.uploadedTexture;
                 }
             }
         }

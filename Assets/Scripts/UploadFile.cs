@@ -12,39 +12,26 @@ public class UploadFile : MonoBehaviour
 {
     FirebaseStorage storage;
     StorageReference storageReference;
-    public byte[] bytes;
+    byte[] bytes;
     public string filename;
     DebugManager db;
     public string FinalPath;
-
-    // public placementIndicator placementIndicatorScript;
+    public Texture2D uploadedTexture;
 
     void Start()
 	{
         db = FindObjectOfType<DebugManager>();
-		FileBrowser.SetFilters( true, new FileBrowser.Filter( "Images", ".jpg", ".png" ), new FileBrowser.Filter( "Text Files", ".txt", ".pdf" ) );
-
-		FileBrowser.SetDefaultFilter( ".jpg" );
-
-		FileBrowser.SetExcludedExtensions( ".lnk", ".tmp", ".zip", ".rar", ".exe" );
-
-		FileBrowser.AddQuickLink( "Users", "C:\\Users", null );
-
         storage = FirebaseStorage.DefaultInstance;
-        storageReference = storage.GetReferenceFromUrl("gs://ar-projects-403118.appspot.com"); //complete
-
+        storageReference = storage.GetReferenceFromUrl("gs://ar-projects-403118.appspot.com");
 	}
 
     public void OnButtonClick()
     {
-        // StartCoroutine( ShowLoadDialogCoroutine());
         LoadFile();
     }
 
     public void LoadFile()
-    {
-        // string fileType = NativeFilePicker.ConvertExtensionToFileType("jpg");
-        
+    {        
         NativeFilePicker.Permission permission = NativeFilePicker.PickFile((path) =>
         {
             if (path == null)
@@ -56,30 +43,12 @@ public class UploadFile : MonoBehaviour
                 FinalPath = path;
                 db.AppendLogMessage(FinalPath);
                 bytes = File.ReadAllBytes(FinalPath);
+                uploadedTexture = new Texture2D(2, 2);
+                uploadedTexture.LoadImage(bytes);
             }
-        }, NativeFilePicker.ConvertExtensionToFileType("png"), NativeFilePicker.ConvertExtensionToFileType("jpg"));
+        }, NativeFilePicker.ConvertExtensionToFileType("png"), NativeFilePicker.ConvertExtensionToFileType("jpg"), NativeFilePicker.ConvertExtensionToFileType("jpeg"));
 
     }
-
-
-	IEnumerator ShowLoadDialogCoroutine()
-	{
-		yield return FileBrowser.WaitForLoadDialog( FileBrowser.PickMode.FilesAndFolders, true, null, null, "Load Files and Folders", "Load" );
-
-		Debug.Log( FileBrowser.Success );
-
-		if( FileBrowser.Success )
-		{
-			for( int i = 0; i < FileBrowser.Result.Length; i++ )
-				Debug.Log( FileBrowser.Result[i] );
-
-			bytes = FileBrowserHelpers.ReadBytesFromFile( FileBrowser.Result[0] );
-            db.AppendLogMessage(FileBrowser.Result[0]);
-
-			// string destinationPath = Path.Combine( Application.persistentDataPath, FileBrowserHelpers.GetFilename( FileBrowser.Result[0] ) );
-			// FileBrowserHelpers.CopyFile( FileBrowser.Result[0], destinationPath );
-		}
-	}
 
     public void uploadSelectedImage()
     {
