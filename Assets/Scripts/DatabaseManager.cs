@@ -16,17 +16,14 @@ public class DatabaseManager : MonoBehaviour
     {
         db = FindObjectOfType<DebugManager>();
         localID = SystemInfo.deviceUniqueIdentifier;
-        db.AppendLogMessage("database manager");
         dbreference = FirebaseDatabase.DefaultInstance.RootReference;
-        db.AppendLogMessage(dbreference.ToString());
-
     }
 
     public void CreateCloudAnchor(string cloudAnchorID, double latitude, double longitude, string imageFileName, double angleSliderNumber, double scaleSliderNumber)
     {
         CloudAnchor newCloudAnchor = new CloudAnchor(cloudAnchorID, latitude, longitude, imageFileName, angleSliderNumber, scaleSliderNumber);
         string json = JsonUtility.ToJson(newCloudAnchor);
-        db.AppendLogMessage(json);
+        // db.AppendLogMessage(json);
         dbreference.Child("cloud anchors").Child(cloudAnchorID).SetRawJsonValueAsync(json);
     }
 

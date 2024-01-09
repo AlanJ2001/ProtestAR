@@ -90,9 +90,7 @@ public class placementIndicator : MonoBehaviour
                 {
                     if (!instantiatedAnchorsSet.Contains(item["cloudAnchorID"]))
                     {
-                        db.AppendLogMessage(item["cloudAnchorID"]);
-                        db.AppendLogMessage(item["angleSliderNumber"]);
-                        db.AppendLogMessage(item["scaleSliderNumber"]);
+                        db.AppendLogMessage("request to resolve " + item["cloudAnchorID"]);
                         CreatePromiseResolveAnchor(item["cloudAnchorID"], item["filename"], item["angleSliderNumber"], item["scaleSliderNumber"]);
                     }
                 }
@@ -113,7 +111,6 @@ public class placementIndicator : MonoBehaviour
         instantiatedImage.AddComponent<ARAnchor>();
         ARAnchor _anchor = anchorManager.AttachAnchor(plane, hitPose);
         instantiatedImage.transform.SetParent(_anchor.transform);
-        db.AppendLogMessage("anchor created");
         // CreatePromise(_anchor);
         anchorToHost = _anchor;
 
@@ -173,7 +170,7 @@ public class placementIndicator : MonoBehaviour
         yield return promise;
         if (promise.State == PromiseState.Cancelled) yield break;
         var result = promise.Result;
-        db.AppendLogMessage(result.CloudAnchorState.ToString());
+        db.AppendLogMessage("host: " + result.CloudAnchorState.ToString());
         db.AppendLogMessage(result.CloudAnchorId);
         if (result.CloudAnchorState == CloudAnchorState.Success)
         {
@@ -207,19 +204,33 @@ public class placementIndicator : MonoBehaviour
         yield return promise;
         if (promise.State == PromiseState.Cancelled) yield break;
         var result = promise.Result;
-        db.AppendLogMessage(result.CloudAnchorState.ToString());
+        db.AppendLogMessage("resolve: " + result.CloudAnchorState.ToString());
         Pose pose = result.Anchor.pose;
         db.AppendLogMessage(pose.ToString());
 
-        StorageReference image = storageReference.Child(filename);
-        db.AppendLogMessage(filename);
-        db.AppendLogMessage("filename above");
+        GameObject instantiatedImage = Instantiate(image, pose.position, pose.rotation);
+        instantiatedImage.transform.Rotate(90, 0, 0);
 
-        image.GetDownloadUrlAsync().ContinueWithOnMainThread(task => 
+        //adjust rotation and scale of image
+        Quaternion initialRotation = instantiatedImage.transform.rotation;
+
+        instantiatedImage.transform.rotation = Quaternion.identity;
+        Quaternion newRotation = Quaternion.AngleAxis(float.Parse(angleSliderNumber), instantiatedImage.transform.forward);
+        instantiatedImage.transform.rotation = initialRotation * newRotation;
+
+        Vector3 originalScale = new Vector3(1, 1, 1);
+        Vector3 newScale = originalScale * float.Parse(scaleSliderNumber);
+        instantiatedImage.transform.localScale = newScale;
+
+        instantiatedAnchorsSet.Add(id);
+
+        StorageReference imageRef = storageReference.Child(filename);
+
+        imageRef.GetDownloadUrlAsync().ContinueWithOnMainThread(task => 
         {
             if (!task.IsFaulted && !task.IsCanceled)
             {
-                StartCoroutine(LoadImage(task.Result.ToString(), pose, id, angleSliderNumber, scaleSliderNumber));
+                StartCoroutine(LoadImage(task.Result.ToString(), pose, id, angleSliderNumber, scaleSliderNumber, instantiatedImage));
             }
             else
             {
@@ -231,7 +242,7 @@ public class placementIndicator : MonoBehaviour
         // instantiatedImage.transform.Rotate(90, 0, 0);
     }
 
-    IEnumerator LoadImage(string MediaUrl, Pose pose, string id, string angleSliderNumber, string scaleSliderNumber)
+    IEnumerator LoadImage(string MediaUrl, Pose pose, string id, string angleSliderNumber, string scaleSliderNumber, GameObject instantiatedImage)
     {
         UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
         yield return request.SendWebRequest();
@@ -241,21 +252,6 @@ public class placementIndicator : MonoBehaviour
         }
         else
         {
-            GameObject instantiatedImage = Instantiate(image, pose.position, pose.rotation);
-            instantiatedImage.transform.Rotate(90, 0, 0);
-
-            //adjust rotation and scale of image
-            Quaternion initialRotation = instantiatedImage.transform.rotation;
-
-            instantiatedImage.transform.rotation = Quaternion.identity;
-            Quaternion newRotation = Quaternion.AngleAxis(float.Parse(angleSliderNumber), instantiatedImage.transform.forward);
-            instantiatedImage.transform.rotation = initialRotation * newRotation;
-
-            Vector3 originalScale = new Vector3(1, 1, 1);
-            Vector3 newScale = originalScale * float.Parse(scaleSliderNumber);
-            instantiatedImage.transform.localScale = newScale;
-
-            instantiatedAnchorsSet.Add(id);
             if (instantiatedImage != null)
             {
                 Renderer renderer = instantiatedImage.GetComponent<Renderer>();

@@ -43,7 +43,6 @@ public class UploadFile : MonoBehaviour
             else
             {
                 FinalPath = path;
-                db.AppendLogMessage(FinalPath);
                 fileExtension = GetFileExtension(FinalPath);
                 bytes = File.ReadAllBytes(FinalPath);
                 uploadedTexture = new Texture2D(2, 2);
