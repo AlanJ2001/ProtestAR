@@ -7,6 +7,7 @@ using SimpleFileBrowser;
 using Firebase;
 using Firebase.Extensions;
 using Firebase.Storage;
+using System;
 
 public class UploadFile : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class UploadFile : MonoBehaviour
     DebugManager db;
     public string FinalPath;
     public Texture2D uploadedTexture;
+    string fileExtension;
 
     void Start()
 	{
@@ -42,6 +44,7 @@ public class UploadFile : MonoBehaviour
             {
                 FinalPath = path;
                 db.AppendLogMessage(FinalPath);
+                fileExtension = GetFileExtension(FinalPath);
                 bytes = File.ReadAllBytes(FinalPath);
                 uploadedTexture = new Texture2D(2, 2);
                 uploadedTexture.LoadImage(bytes);
@@ -54,9 +57,9 @@ public class UploadFile : MonoBehaviour
     {
         //Editing Metadata
         var newMetadata = new MetadataChange();
-        newMetadata.ContentType = "image/jpeg";
+        newMetadata.ContentType = "image/" + fileExtension;
 
-        filename = "uploads/" + GetTimeWithRandomDigits() + ".jpeg";
+        filename = "uploads/" + GetTimeWithRandomDigits() + "." + fileExtension;
 
         StorageReference uploadRef = storageReference.Child(filename);
         Debug.Log("File upload started");
@@ -100,4 +103,34 @@ public class UploadFile : MonoBehaviour
 
         return randomDigits;
     }
+
+    public static string GetFileExtension(string filePath)
+    {
+        // Check if the file path is not null or empty
+        if (string.IsNullOrEmpty(filePath))
+        {
+            throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
+        }
+
+        try
+        {
+            // Use Path.GetExtension method to get the file extension
+            string extension = Path.GetExtension(filePath);
+
+            // Check if the extension is not empty
+            if (!string.IsNullOrEmpty(extension))
+            {
+                // Remove the leading dot from the extension
+                extension = extension.TrimStart('.');
+            }
+
+            return extension;
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions, e.g., if the file path is invalid
+            return null;
+        }
+    }
+
 }

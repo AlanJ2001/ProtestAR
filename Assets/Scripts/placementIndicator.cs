@@ -175,9 +175,12 @@ public class placementIndicator : MonoBehaviour
         var result = promise.Result;
         db.AppendLogMessage(result.CloudAnchorState.ToString());
         db.AppendLogMessage(result.CloudAnchorId);
-        uploadFileScript.uploadSelectedImage();
-        database.CreateCloudAnchor(result.CloudAnchorId, 55.32, -4.05, uploadFileScript.filename, rotationSlider.value * 360f, scaleSlider.value);
-        ResetScene();
+        if (result.CloudAnchorState == CloudAnchorState.Success)
+        {
+            uploadFileScript.uploadSelectedImage();
+            database.CreateCloudAnchor(result.CloudAnchorId, 55.32, -4.05, uploadFileScript.filename, rotationSlider.value * 360f, scaleSlider.value);
+            ResetScene();
+        }
     }
 
     private void ResetScene()
