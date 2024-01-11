@@ -8,6 +8,7 @@ public class SimpleLoading : MonoBehaviour {
     private RectTransform rectComponent;
     private Image imageComp;
     public float rotateSpeed = 200f;
+    public placementIndicator placementIndicatorScript;
 
     // Use this for initialization
     void Start () {
@@ -17,6 +18,13 @@ public class SimpleLoading : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        rectComponent.Rotate(0f, 0f, -(rotateSpeed * Time.deltaTime));
+        if (placementIndicatorScript.hosting)
+        {
+            transform.parent.localScale = new Vector3(2.1f, 2.1f, 2.1f);
+            rectComponent.Rotate(0f, 0f, -(rotateSpeed * Time.deltaTime));
+        }else
+        {
+            transform.parent.localScale = Vector3.zero;
+        }
     }
 }

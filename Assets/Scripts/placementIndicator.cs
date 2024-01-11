@@ -35,6 +35,7 @@ public class placementIndicator : MonoBehaviour
     public Quaternion initialRotation;
     public Slider rotationSlider;
     public Slider scaleSlider;
+    public bool hosting;
 
     void Start()
     {
@@ -46,6 +47,7 @@ public class placementIndicator : MonoBehaviour
         storage = FirebaseStorage.DefaultInstance;
         storageReference = storage.GetReferenceFromUrl("gs://ar-projects-403118.appspot.com");
         instantiatedAnchorsSet = new HashSet<string>();
+        hosting = false;
     }
 
     void Update()
@@ -178,6 +180,7 @@ public class placementIndicator : MonoBehaviour
             database.CreateCloudAnchor(result.CloudAnchorId, 55.32, -4.05, uploadFileScript.filename, rotationSlider.value * 360f, scaleSlider.value);
             ResetScene();
         }
+        hosting = false;
     }
 
     private void ResetScene()
@@ -271,5 +274,6 @@ public class placementIndicator : MonoBehaviour
     public void test(){
         CreatePromise(anchorToHost);
         anchorToHost = null;
+        hosting = true;
     }
 }
