@@ -1410,7 +1410,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   filename: 
   FinalPath: 
-  uploadedTexture: {fileID: 0}
+  uploadedTexture: {fileID: 2800000, guid: 9731045602c0ef2419e01bdf13ea89d5, type: 3}
 --- !u!114 &854905465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2596,10 +2596,10 @@ MonoBehaviour:
   m_FillRect: {fileID: 779833894}
   m_HandleRect: {fileID: 633987595}
   m_Direction: 2
-  m_MinValue: 0.5
+  m_MinValue: 0.2
   m_MaxValue: 1
   m_WholeNumbers: 0
-  m_Value: 0.5
+  m_Value: 0.2
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
