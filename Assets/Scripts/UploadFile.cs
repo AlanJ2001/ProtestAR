@@ -19,6 +19,7 @@ public class UploadFile : MonoBehaviour
     public string FinalPath;
     public Texture2D uploadedTexture;
     string fileExtension;
+    public GameObject errorMessage;
 
     void Start()
 	{
@@ -29,6 +30,7 @@ public class UploadFile : MonoBehaviour
 
     public void OnButtonClick()
     {
+        errorMessage.transform.localScale = new Vector3(0f, 0f, 0f);
         LoadFile();
     }
 

@@ -36,6 +36,7 @@ public class placementIndicator : MonoBehaviour
     public Slider rotationSlider;
     public Slider scaleSlider;
     public bool hosting;
+    public GameObject errorMessage;
 
     void Start()
     {
@@ -272,6 +273,11 @@ public class placementIndicator : MonoBehaviour
     }
 
     public void test(){
+        if (uploadFileScript.FinalPath == "")
+        {
+            errorMessage.transform.localScale = new Vector3(6.26f, 1.35f, 1.35f);
+            return;
+        }
         CreatePromise(anchorToHost);
         anchorToHost = null;
         hosting = true;
