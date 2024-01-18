@@ -215,6 +215,12 @@ public class placementIndicator : MonoBehaviour
         GameObject instantiatedImage = Instantiate(image, pose.position, pose.rotation);
         instantiatedImage.transform.Rotate(90, 0, 0);
 
+        if (plane != null)
+        {
+            ARAnchor _anchor = anchorManager.AttachAnchor(plane, hitPose);
+            instantiatedImage.transform.SetParent(_anchor.transform);
+        }
+
         //adjust rotation and scale of image
         Quaternion initialRotation = instantiatedImage.transform.rotation;
 
