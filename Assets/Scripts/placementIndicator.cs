@@ -59,7 +59,7 @@ public class placementIndicator : MonoBehaviour
         {
             Touch touch = Input.GetTouch(0);
             float y = touch.position.y;
-            if (y > 301.4)
+            if (y > 507)
             {
                 PlaceObject();
             }
