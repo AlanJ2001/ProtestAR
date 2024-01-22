@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2784268169784639837}
   - component: {fileID: 8501519308113619874}
   - component: {fileID: 5342169856712595486}
+  - component: {fileID: 7206849582220188283}
   - component: {fileID: 7378798703736562612}
   m_Layer: 5
   m_Name: postBtn
@@ -93,6 +94,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cloudAnchorId: 
   selected: 0
+--- !u!114 &7206849582220188283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 365847514086330025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4282e6ebdfbfcdf42a6a1a46cbcb42e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &7378798703736562612
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,7 +149,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 8501519308113619874}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 7206849582220188283}
+        m_TargetAssemblyTypeName: ButtonColorChanger, Assembly-CSharp
+        m_MethodName: ChangeButtonColor
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &5220589175870510878
 GameObject:
   m_ObjectHideFlags: 0
