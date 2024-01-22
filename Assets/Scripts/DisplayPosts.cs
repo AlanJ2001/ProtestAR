@@ -24,8 +24,7 @@ public class DisplayPosts : MonoBehaviour
     void Start()
     {
         debugManagerScript.AppendLogMessage("display posts works");
-        PrintCloudAnchors();
-        GenerateImageGrid();
+        GetPostsAndDisplay();
     }
 
     // Update is called once per frame
@@ -34,23 +33,31 @@ public class DisplayPosts : MonoBehaviour
         
     }
 
-    public void PrintCloudAnchors()
+    public void GetPostsAndDisplay()
     {
         StartCoroutine(databaseManagerScript.GetAllIDs((List<Dictionary<string, string>> cloudAnchorsList) => 
         {
-                foreach (Dictionary<string, string> item in cloudAnchorsList)
-                {
-                        debugManagerScript.AppendLogMessage(item["cloudAnchorID"]);
-                }
+                GenerateImageGrid(cloudAnchorsList);
         }));
     }
 
-    private void GenerateImageGrid()
+    private void GenerateImageGrid(List<Dictionary<string, string>> cloudAnchorsList)
     {
+        var index = 0;
+        var len = cloudAnchorsList.Count;
+        string cloudAnchorId;
         for (int row = 0; row < rows; row++)
         {
             for (int col = 0; col < columns; col++)
             {
+                if (index < len)
+                {
+                    cloudAnchorId = cloudAnchorsList[index]["cloudAnchorID"];
+                }
+                else
+                {
+                    return;
+                }
                 // Instantiate image prefab
                 GameObject imageObject = Instantiate(imagePrefab, gridParent);
 
@@ -60,6 +67,11 @@ public class DisplayPosts : MonoBehaviour
 
                 // Set position
                 imageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(posX, posY);
+
+                PostBtnScript postBtnScript = imageObject.GetComponent<PostBtnScript>();
+                postBtnScript.cloudAnchorId = cloudAnchorId;
+                postBtnScript.selected = false;
+                index += 1;
             }
         }
     }
