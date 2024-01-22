@@ -15,11 +15,17 @@ public class DisplayPosts : MonoBehaviour
 {
     public DebugManager debugManagerScript;
     public DatabaseManager databaseManagerScript;
+    public GameObject imagePrefab; // Reference to your image prefab
+    public Transform gridParent; // Parent transform for grid layout
+    public float spacing = 10f; // Spacing between images
+    public int columns = 2; // Number of columns in the grid
+    public int rows = 4; // Number of rows in the grid
     // Start is called before the first frame update
     void Start()
     {
         debugManagerScript.AppendLogMessage("display posts works");
         PrintCloudAnchors();
+        GenerateImageGrid();
     }
 
     // Update is called once per frame
@@ -37,5 +43,24 @@ public class DisplayPosts : MonoBehaviour
                         debugManagerScript.AppendLogMessage(item["cloudAnchorID"]);
                 }
         }));
+    }
+
+    private void GenerateImageGrid()
+    {
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < columns; col++)
+            {
+                // Instantiate image prefab
+                GameObject imageObject = Instantiate(imagePrefab, gridParent);
+
+                // Calculate position based on row and column
+                float posX = col * (imagePrefab.GetComponent<RectTransform>().sizeDelta.x + spacing) + 250;
+                float posY = -row * (imagePrefab.GetComponent<RectTransform>().sizeDelta.y + spacing) - 250;
+
+                // Set position
+                imageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(posX, posY);
+            }
+        }
     }
 }
