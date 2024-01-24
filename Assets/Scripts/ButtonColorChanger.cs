@@ -4,7 +4,14 @@ using UnityEngine.UI;
 public class ButtonColorChanger : MonoBehaviour
 {
     private Button myButton;
-    private bool selected = false;
+    public bool selected = false;
+    public string cloudAnchorId;
+    PostsToDelete postsToDeleteScript;
+
+    void Start()
+    {
+        postsToDeleteScript = FindObjectOfType<PostsToDelete>();
+    }
 
     // Function to change the color of the button
     public void ChangeButtonColor()
@@ -16,11 +23,13 @@ public class ButtonColorChanger : MonoBehaviour
         {
             newAlpha = 1f;
             selected = true;
+            postsToDeleteScript.postsToDelete.Add(cloudAnchorId);
         }
         else
         {
             newAlpha = 0f;
             selected = false;
+            postsToDeleteScript.postsToDelete.Remove(cloudAnchorId);
         }
         Color currentColor = tickImage.color;
         Color newColor = new Color(currentColor.r, currentColor.g, currentColor.b, newAlpha);

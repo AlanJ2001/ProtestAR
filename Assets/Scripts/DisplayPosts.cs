@@ -68,9 +68,8 @@ public class DisplayPosts : MonoBehaviour
                 // Set position
                 imageObject.GetComponent<RectTransform>().anchoredPosition = new Vector2(posX, posY);
 
-                PostBtnScript postBtnScript = imageObject.GetComponent<PostBtnScript>();
-                postBtnScript.cloudAnchorId = cloudAnchorId;
-                postBtnScript.selected = false;
+                ButtonColorChanger buttonColorChangerScript = imageObject.GetComponent<ButtonColorChanger>();
+                buttonColorChangerScript.cloudAnchorId = cloudAnchorId;
                 index += 1;
             }
         }
