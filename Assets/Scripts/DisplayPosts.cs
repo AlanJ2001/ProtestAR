@@ -21,8 +21,13 @@ public class DisplayPosts : MonoBehaviour
     public int columns = 2; // Number of columns in the grid
     public int rows = 4; // Number of rows in the grid
     // Start is called before the first frame update
+    StorageReference storageReference;
+    FirebaseStorage storage;
+
     void Start()
     {
+        storage = FirebaseStorage.DefaultInstance;
+        storageReference = storage.GetReferenceFromUrl("gs://ar-projects-403118.appspot.com");
         debugManagerScript.AppendLogMessage("display posts works");
         GetPostsAndDisplay();
     }
@@ -46,6 +51,7 @@ public class DisplayPosts : MonoBehaviour
         var index = 0;
         var len = cloudAnchorsList.Count;
         string cloudAnchorId;
+        string filename;
         for (int row = 0; row < rows; row++)
         {
             for (int col = 0; col < columns; col++)
@@ -53,6 +59,7 @@ public class DisplayPosts : MonoBehaviour
                 if (index < len)
                 {
                     cloudAnchorId = cloudAnchorsList[index]["cloudAnchorID"];
+                    filename = cloudAnchorsList[index]["filename"];
                 }
                 else
                 {
@@ -71,7 +78,49 @@ public class DisplayPosts : MonoBehaviour
                 ButtonColorChanger buttonColorChangerScript = imageObject.GetComponent<ButtonColorChanger>();
                 buttonColorChangerScript.cloudAnchorId = cloudAnchorId;
                 index += 1;
+
+                StorageReference imageRef = storageReference.Child(filename);
+
+                imageRef.GetDownloadUrlAsync().ContinueWithOnMainThread(task => 
+                {
+                    if (!task.IsFaulted && !task.IsCanceled)
+                    {
+                        StartCoroutine(LoadImage(task.Result.ToString(), imageObject));
+                    }
+                    else
+                    {
+                        Debug.Log(task.Exception);
+                    }
+                });
             }
+        }
+    }
+
+    IEnumerator LoadImage(string MediaUrl, GameObject instantiatedImage)
+    {
+        UnityWebRequest request = UnityWebRequestTexture.GetTexture(MediaUrl);
+        yield return request.SendWebRequest();
+        if (request.isNetworkError || request.isHttpError)
+        {
+            Debug.Log(request.error);
+        }
+        else
+        {
+            if (instantiatedImage != null)
+            {
+                Image image = instantiatedImage.GetComponent<Image>();
+                if (image != null)
+                {
+                    Texture2D newTexture = ((DownloadHandlerTexture)request.downloadHandler).texture;
+                    if (newTexture != null)
+                    {
+                        Sprite newSprite = Sprite.Create(newTexture, new Rect(0, 0, newTexture.width, newTexture.height), Vector2.one * 0.5f);
+                        image.sprite = newSprite;
+                        newTexture = null;
+                    }
+                }
+            }
+            // rawImage.texture = ((DownloadHandlerTexture)request.downloadHandler).texture;
         }
     }
 }
