@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Firebase;
 using Firebase.Database;
+using System;
+
 
 public class DatabaseManager : MonoBehaviour
 {
@@ -76,8 +78,24 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
-    public string test()
+    public async void DeleteCloudAnchor(string cloudAnchorID)
     {
-        return "database working";
+        // Assuming 'CloudAnchors' is the name of the node in your database where the CloudAnchor objects are stored
+        DatabaseReference cloudAnchorRef = dbreference.Child("cloud anchors").Child(cloudAnchorID);
+
+        try
+        {
+            await cloudAnchorRef.RemoveValueAsync();
+            Debug.Log("CloudAnchor deleted successfully");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Failed to delete CloudAnchor: " + e.Message);
+        }
+    }
+
+    public void test(string str)
+    {
+        db.AppendLogMessage(str);
     }
 }

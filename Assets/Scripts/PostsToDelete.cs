@@ -9,9 +9,18 @@ public class PostsToDelete : MonoBehaviour
 {
     public HashSet<string> postsToDelete = new HashSet<string>();
     public List<string> alist = new List<string>();
+    public DatabaseManager databaseManagerScript;
 
     void Update()
     {
         alist = postsToDelete.ToList();
+    }
+
+    public void DeletePosts()
+    {
+        foreach (string item in postsToDelete)
+        {
+            databaseManagerScript.DeleteCloudAnchor(item);
+        }
     }
 }
