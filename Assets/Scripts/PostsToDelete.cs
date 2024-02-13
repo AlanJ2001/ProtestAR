@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq; // Make sure to include this namespace
+using UnityEngine.SceneManagement;
 
 
 // The purpose of this script is to store the cloud anchor IDs that have been selected on the delete posts page.
@@ -22,5 +23,6 @@ public class PostsToDelete : MonoBehaviour
         {
             databaseManagerScript.DeleteCloudAnchor(item);
         }
+        SceneManager.LoadScene("DeletePosts");
     }
 }
